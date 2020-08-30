@@ -1,0 +1,159 @@
+---
+title: "assigh01-roulette"
+author: " Wenqi Lyu"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  html_document: 
+    code_folding: hide
+    toc: yes
+    number_sections: true
+    toc_depth: 3
+    toc_float: true
+---
+```{r global options, include = FALSE}
+knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
+```
+
+# Introduction
+There are several strategies for playing roulette. (Strategies is in italics because the house always wins, in the long run.) Consider one such strategy:“Martingale” strategy.
+
+## Background
+Here is an image could help you understand"Martingale":
+
+![Caption: Image of Martingale.](/Users/sevenlv/Projects/probability-and-inference-portfolio-wenqi-lyu/01-roulette/martingale-strategy.svg){#id .class width=50% height=50%}
+
+# Methods
+
+A player will use the above strategy and play until:
+
+1.the player has 200 dollars
+
+2.the player goes bankrupt
+
+3.the player completes 10 wagers (or plays)
+
+4.the casino wager limit is 100
+
+5.the budget threshold for successfully stopping is 300
+
+```{r}
+#' A single play of the Martingale strategy
+#'
+#' Takes a state list, spins the roulette wheel, returns the state list with updated values (for example, budget, plays, etc)
+#' @param state A list with the following entries: 
+#'   B              number, the budget
+#'   W              number, the budget threshold for successfully stopping
+#'   L              number, the maximum number of plays 
+#'   M              number, the casino wager limit
+#'   plays          integer, the number of plays executed
+#'   previous_wager number, the wager in the previous play (0 at first play)
+#'   previous_win   TRUE/FALSE, indicator if the previous play was a win (TRUE at first play)
+#' @return The updated state list
+one_play <- function(state){
+  
+    # Wager
+    proposed_wager <- ifelse(state$previous_win, 1, 2*state$previous_wager)
+    wager <- min(proposed_wager, state$M, state$B)
+    
+    # Spin of the wheel
+    red <- rbinom(1,1,18/38)
+    
+    # Update state
+    state$plays <- state$plays + 1
+    state$previous_wager <- wager
+    if(red){
+      # WIN
+      state$B <- state$B + wager
+      state$previous_win <- TRUE
+    }else{
+      # LOSE
+      state$B <- state$B - wager
+      state$previous_win <- FALSE
+    }
+  state
+}
+
+
+#' Stopping rule
+#'
+#' Takes the state list and determines if the gambler has to stop
+#' @param state A list.  See one_play
+#' @return TRUE/FALSE
+stop_play <- function(state){
+  if(state$B <= 0) return(TRUE)
+  if(state$plays >= state$L) return(TRUE)
+  if(state$B >= state$W) return(TRUE)
+  FALSE
+}
+
+
+#' Play roulette to either bankruptcy, success, or play limits
+#'
+#' @param B number, the starting budget
+#' @param W number, the budget threshold for successfully stoping
+#' @param L number, the maximum number of plays 
+#' @param M number, the casino wager limit
+#' @return A vector of budget values calculated after each play.
+one_series <- function(
+    B = 200
+  , W = 300
+  , L = 1000
+  , M = 100
+){
+
+  # initial state
+  state <- list(
+    B = B
+  , W = W
+  , L = L
+  , M = M
+  , plays = 0
+  , previous_wager = 0
+  , previous_win = TRUE
+  )
+  
+  # vector to store budget over series of plays
+  budget <- rep(NA, L)
+  
+  # For loop of plays
+  for(i in 1:L){
+    new_state <- state %>% one_play
+    budget[i] <- new_state$B
+    if(new_state %>% stop_play){
+      return(budget[1:i])
+    }
+    state <- new_state
+  }
+  budget    
+}
+
+# helper function
+get_last <- function(x) x[length(x)] 
+```
+
+## Simulation
+```{r}
+library(magrittr)
+walk_out_money <- rep(NA, 10000)
+for(j in seq_along(walk_out_money)){
+  walk_out_money[j] <- one_series(B = 200, W = 300, L = 10, M = 100) %>% get_last
+}
+
+# Walk out money distribution
+
+hist(walk_out_money, breaks = 100)
+```
+
+## Estimated probability of walking out with extra cash
+```{r}
+mean(walk_out_money > 200)
+```
+
+## Estimated earnings
+```{r}
+mean(walk_out_money - 200)
+```
+
+# Conclusion
+
+After playing this game under condition mentioned above, we could know that the probability of walking out with extra cash is 0.795, which means that we have some risks to lose money. The estimated earnings is -1.8395, which means we might lose money in this game.
