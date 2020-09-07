@@ -10,6 +10,29 @@ output:
     toc_depth: 3
     toc_float: true
 ---
+
+incomplete. Please follow assignment instructions:
+
+You should explain how you used computer simulation to calculate the
+average earnings of a gambler that uses this strategy. As part of
+the explanation, provide a figure (or a series of figures) that show
+how the gamblers earnings (or losses) evolve over a series of wagers
+at the roulette wheel. (The x-axis will be the wager number (or play
+number), the y-axis will be earnings.) The code below provides all
+the functions you’ll need to calculate average earnings.
+
+Show your audience how changing a parameter of the simulation (see
+table below) does or does not have an impact on average earnings. A
+figure would be helpful.
+
+See the stopping rule below. Explain to your audience how you used
+computer simulation to estimate the average number of plays before
+stopping. The code below will need to be modified to calculate this
+quantity.
+
+Be sure to explain the limitations of the simulation; identify
+simplifications or other sources of uncertainty.
+
 ```{r global options, include = FALSE}
 knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
 ```
@@ -23,26 +46,14 @@ Here is an image could help you understand"Martingale":
 ![Caption: Image of Martingale.](/Users/sevenlv/Projects/probability-and-inference-portfolio-wenqi-lyu/01-roulette/martingale-strategy.svg){#id .class width=50% height=50%}
 
 # Methods
-
-A player will use the above strategy and play until:
-
-1.the player has 200 dollars
-
-2.the player goes bankrupt
-
-3.the player completes 10 wagers (or plays)
-
-4.the casino wager limit is 100
-
-5.the budget threshold for successfully stopping is 300
-
 ```{r}
+library(magrittr)
 #' A single play of the Martingale strategy
 #'
 #' Takes a state list, spins the roulette wheel, returns the state list with updated values (for example, budget, plays, etc)
 #' @param state A list with the following entries: 
 #'   B              number, the budget
-#'   W              number, the budget threshold for successfully stopping
+#'   W              number, the budget threshold for successfully stoping
 #'   L              number, the maximum number of plays 
 #'   M              number, the casino wager limit
 #'   plays          integer, the number of plays executed
@@ -129,31 +140,99 @@ one_series <- function(
 
 # helper function
 get_last <- function(x) x[length(x)] 
+
+for(i in c(1:3)){
+  one_person_play <- one_series(B = 200, W = 300, L = 1000, M = 100)
+  
+  plot(x=c(1:length(one_person_play)), y=one_person_play, type="l", xlab = "Play Number", ylab = "Money in Pocket")
+}
+
+
+```
+## Simulation
+
+```{r}
+
+# Simulation
+walk_out_money <- rep(NA, 100)
+for(j in seq_along(walk_out_money)){
+  walk_out_money[j] <- one_series(B = 200, W = 300, L = 1000, M = 100) %>% get_last
+}
+
+# Walk out money distribution
+hist(walk_out_money, breaks = 100)
+
+# Estimated probability of walking out with extra cash
+#mean(walk_out_money > 200)
+
+# Estimated earnings
+#mean(walk_out_money - 200)
 ```
 
-## Simulation
+The Estimate probability of walking out with extra cash is `r mean(walk_out_money > 200)`. The Estimate earnings would be on average `mean(walk_out_money - 200)`. Our estimated earnings are negative and we walk out with more money less than 1/2 of the time on average. We might lose some money on this game, we could change another strategy which is more profitable.
+
+## Changing the the maximum number of plays 
+
+L = 1000 changed to L=10, I hope to see that more people walk out with more than $0
 ```{r}
-library(magrittr)
-walk_out_money <- rep(NA, 10000)
+
+# Simulation
+walk_out_money <- rep(NA, 100)
 for(j in seq_along(walk_out_money)){
   walk_out_money[j] <- one_series(B = 200, W = 300, L = 10, M = 100) %>% get_last
 }
 
 # Walk out money distribution
-
 hist(walk_out_money, breaks = 100)
+
+# Estimated probability of walking out with extra cash
+#mean(walk_out_money > 200)
+
+# Estimated earnings
+#mean(walk_out_money - 200)
+```
+The Estimate probability of walking out with extra cash is `r mean(walk_out_money > 200)`. The Estimate earnings would be on average `r mean(walk_out_money - 200)`. more people will walk out with extra money than the simulation mentioned before.
+
+
+### optional plot
+```{r}
+library(magrittr)
+max_num_plays = seq(10,1000, by=10)
+avg.earn= NA
+
+for(i in c(1:length(max_num_plays))){
+  #Simulation
+  walk_out_money <- rep(NA,100)
+  for (j in seq_along(walk_out_money)){
+    walk_out_money[j] <- one_series(B = 200, W= 300, L = max_num_plays[i], M = 100) %>% get_last
+  }
+  #Estimated earnings
+  avg.earn[i] = mean(walk_out_money - 200)
+}
+
+plot(x=max_num_plays, y=avg.earn, type="l")
 ```
 
-## Estimated probability of walking out with extra cash
-```{r}
-mean(walk_out_money > 200)
-```
 
-## Estimated earnings
+# Stopping Rule
+
 ```{r}
-mean(walk_out_money - 200)
+# Simulation
+num.plays <- rep(NA,100)
+for(j in seq_along(num.plays)){
+  num.plays[j] <- one_series(B = 200, W =300, L = 1000, M = 100) %>% length()
+}
+
+
+#Walk out money distribution
+
+hist(num.plays, breaks = 10)
+#mean(num.plays)
 ```
+the mean number of plays is `r mean(num.plays)` , because this is so close to L=10 we know almost everyone is stopping because they reach the max of plays.
 
 # Conclusion
+Playing roulette in the (B = 200, W =300, L = 1000, M = 100 scenario is high risk to lose money. But when the L decreases, more people will walk out with extra money than the simulation mentioned before.
 
-After playing this game under condition mentioned above, we could know that the probability of walking out with extra cash is 0.795, which means that we have some risks to lose money. The estimated earnings is -1.8395, which means we might lose money in this game.
+# Limitation
+the conclusion might be biased if we do not simulate a large amount of people participant in the roulette.
