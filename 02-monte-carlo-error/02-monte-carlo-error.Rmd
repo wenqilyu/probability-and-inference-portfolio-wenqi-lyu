@@ -1,0 +1,126 @@
+---
+title: "02-monte-carlo-error"
+author: "Wenqi Lyu"
+date: "9/7/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library("magrittr")
+library("dplyr")
+library("showtext")
+library("sysfonts")
+library("showtextdb")
+library("tidyr")
+
+```
+# Simulation
+```{r}
+# Parameters 
+#   Sample size = 2^(2:15)
+#   Underlying true probability = c(0.01,0.05,0.10, 0.25, 0.50)
+#   Parameters a list
+parameters <- list(R = 5000, ss = 4, p = .1)
+# Process
+#   Generationg biomial RV of a specific sample size and specific probability
+create_data <- function(parameters){
+  parameters $ data <- rbinom(parameters$ss,1,parameters$p)
+  parameters
+}
+absoulute_error <- function(parameters){
+  abs(parameters$phat - parameters$p)
+}
+
+relative_error <- function(parameters){
+  abs(parameters$p_hat - parameters$p)/parameters$p
+}
+
+
+create_data_estimate_p <- function(parameters){
+  parameters$p_hat <- rbinom(parameters$R, parameters$ss,  parameters$p)/parameters$ss
+  parameters
+}
+# Property
+#    Absolute error |p̂−p|
+#    Relative error |p̂−p|/p.
+# Repeat
+#    Distribution
+
+one_p_n <- function(parameters){
+ ae <- parameters %>% create_data_estimate_p %>% absolute_error
+ re <- ae/parameters$p
+ mae <- mean(ae)
+ mre <- mean(re) 
+ c(mae,mre)
+}
+
+one_p_n(parameters)
+
+simulation_settings <- expand.grid(
+  R = 5000
+  ,p = c(0.01,0.05,0.10, 0.25, 0.50)
+  ,ss = 2^(2:15)
+  ,mae = NA_real_
+  ,mre = NA_real_
+  ,KEEP.OUT.ATTRS = FALSE
+)
+
+for(i in 1:nrow(simulation_settings)){
+  simulation_settings[i, c("mae","mre")] <- simulation_settings[i, ] %>% as.list %>% one_p_n()
+}
+
+
+```
+
+
+#Plot
+## Absoulte Error
+```{r}
+
+simulation_settings %>%
+  mutate(col = factor(p) %>% as.numeric) %>%
+  plotstyle(upright,mar=c(3,3,2,1)) %>%
+  plot_setup(mae ~ log(ss,base=2)) %>%
+  split(.$p) %>%
+  lwith({
+    lines(log(ss,base=2),mae, type = "b", col = col[1], lwd =4)
+    c(p[1],col[1])
+  }) %>%
+  do.call("rbind", . ) %>%
+  (function(x){
+    legend("topright", legend = "p=" %|% x[,1],col = x[,2], lwd = 4,bty="n")
+  })
+box()
+axis(side = 1, at = axTicks(1), labels = 2^axTicks(1))
+axis(2)
+title(main = "Mean Abosolute Error")
+title(ylab = "MAE",line = 2)
+title(xlab = "Sample Size", line = 1.5)
+```
+
+## Relative Error
+```{r}
+
+simulation_settings %>%
+  mutate(col = factor(p) %>% as.numeric) %>%
+  plotstyle(upright,mar=c(3,3,2,1)) %>%
+  plot_setup(mre ~ log(ss,base=10)) %>%
+  split(.$p) %>%
+  lwith({
+    lines(log(ss,base=10),mre, type = "b", col = col[1], lwd =2)
+    c(p[1],col[1])
+  }) %>%
+  do.call("rbind", . ) %>%
+  (function(x){
+    legend("topright", legend = "p=" %|% x[,1],col = x[,2], lwd = 4,bty="n")
+  })
+box()
+axis(side = 1, at = axTicks(1), labels = 2^axTicks(1))
+axis(2)
+title(main = "Mean Relative Error")
+title(ylab = "MRE",line = 2)
+title(xlab = "Sample Size", line = 1.5)
+```
