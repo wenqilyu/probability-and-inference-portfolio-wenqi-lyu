@@ -149,6 +149,11 @@ for(i in c(1:3)){
 
 
 ```
+* Explanation of plots: These plots show three different people plat roulette. 
+1st people: the more he/she plays, the more money in his/her pocket.
+2nd people: he/she could earn money from roulette before about 175 times he/she plays. Then, he/she lose money.
+3rd people: he/she almost do not lose money and earn money from this game, but when he/she plays over 15 times, he/she lose money.
+* Explanation of Tomas code: It shows that one person has $200 starting budget, when he/she earn $100, or they do not have any money, he/she will stop playing this game. maximum number of plays is 1000, and wager limit is 100. The probability of red is 18/38. 
 ## Simulation
 
 ```{r}
@@ -213,6 +218,7 @@ for(i in c(1:length(max_num_plays))){
 plot(x=max_num_plays, y=avg.earn, type="l")
 ```
 
+* Explanation of plot: The line graph shows the decreasing trend. The more time we plays, the lower earning we could get.
 
 # Stopping Rule
 
@@ -233,6 +239,7 @@ the mean number of plays is `r mean(num.plays)` , because this is so close to L=
 
 # Conclusion
 Playing roulette in the (B = 200, W =300, L = 1000, M = 100 scenario is high risk to lose money. But when the L decreases, more people will walk out with extra money than the simulation mentioned before.
+I do not think roulette is profitable in all situations. we could see the last but 2 graph, it shows the decreasing trend. the earning of game is lower than 0.
 
 # Limitation
 the conclusion might be biased if we do not simulate a large amount of people participant in the roulette.
