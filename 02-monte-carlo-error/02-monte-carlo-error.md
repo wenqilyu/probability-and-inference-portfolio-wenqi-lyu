@@ -1,16 +1,11 @@
----
-title: "02-monte-carlo-error"
-author: "Wenqi Lyu"
-date: "9/7/2020"
-output: github_document
-  
----
-# Plot
-```{r global options, include = FALSE}
-knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
-```
+02-monte-carlo-error
+================
+Wenqi Lyu
+9/7/2020
 
-```{r}
+# Plot
+
+``` r
 #Plot function
 plotstyle <- function(data = NULL, style = NULL,...){
   pstl <- deparse(substitute(style))
@@ -65,13 +60,9 @@ plot_setup <- function(d, f, xlim = NULL, ylim = NULL, log = "", asp = NA, xaxs 
 
 lwith <- function(l, ...) lapply(l, function(x, ...){with(x, ...)}, ... )
 `%|%` <- function(a,b) paste0(a,b)
-
 ```
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-```{r}
+``` r
 library("magrittr")
 library("dplyr")
 library("showtext")
@@ -80,7 +71,7 @@ library("showtextdb")
 library("tidyr")
 ```
 
-```{r}
+``` r
 # Parameters 
 #   Sample size = 2^(2:15)
 #   Underlying true probability = c(0.01,0.05,0.10, 0.25, 0.50)
@@ -130,14 +121,11 @@ simulation_settings <- expand.grid(
 for(i in 1:nrow(simulation_settings)){
   simulation_settings[i, c("mae","mre")] <- simulation_settings[i, ] %>% as.list %>% one_p_n()
 }
-
 ```
-
-
 
 ## Absolute Error
 
-```{r}
+``` r
 simulation_settings %>%
   mutate(col = factor(p) %>% as.numeric) %>%
   plotstyle(upright,mar=c(3,3,2,1)) %>%
@@ -159,11 +147,11 @@ title(ylab = "MAE",line = 2)
 title(xlab = "Sample Size", line = 1.5)
 ```
 
+![](02-monte-carlo-error_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ## Relative Error
 
-```{r}
-
+``` r
 simulation_settings %>%
   mutate(col = factor(p) %>% as.numeric) %>%
   plotstyle(upright,mar=c(3,3,2,1)) %>%
@@ -183,6 +171,6 @@ axis(2)
 title(main = "Mean Relative Error")
 title(ylab = "MRE",line = 2)
 title(xlab = "Sample Size", line = 1.5)
-
 ```
 
+![](02-monte-carlo-error_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
