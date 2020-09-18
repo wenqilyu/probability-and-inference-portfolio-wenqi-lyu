@@ -146,6 +146,11 @@ for(i in c(1:3)){
   
   plot(x=c(1:length(one_person_play)), y=one_person_play, type="l", xlab = "Play Number", ylab = "Money in Pocket")
 }
+# Simulation
+walk_out_money <- rep(NA, 5000)
+for(j in seq_along(walk_out_money)){
+  walk_out_money[j] <- one_series(B = 200, W = 300, L = 1000, M = 100) %>% get_last
+}
 
 
 ```
@@ -154,15 +159,18 @@ for(i in c(1:3)){
 2nd people: he/she could earn money from roulette before about 175 times he/she plays. Then, he/she lose money.
 3rd people: he/she almost do not lose money and earn money from this game, but when he/she plays over 15 times, he/she lose money.
 * Explanation of Tomas code: It shows that one person has $200 starting budget, when he/she earn $100, or they do not have any money, he/she will stop playing this game. maximum number of plays is 1000, and wager limit is 100. The probability of red is 18/38. 
+The estimated probability of walking out with extra cash is `r mean(walk_out_money > 200)`. The estimated earnings would be on average `r mean(walk_out_money - 200)`. 
+we see on average we walk out with more money more than 1/2 of the time but our earnings are still negative. I would say these parameters show the gambling game is not safe and I still hope you not to play.
+
+The function one_play: one_play shows us how the game plays and how the variables change, for example,time of plays.Each time we play, the state$plays will plus 1, if we win the game, we will earn some money, if we lose the game, we will lose money.The probability of red(win) is 18/38.
+
+The function one_series: one_series show us the result of one person play the game, and 'one_series(B=200, W=300, L=1000, M=100)' means the walk of money of this person.
+
+
 ## Simulation
 
 ```{r}
 
-# Simulation
-walk_out_money <- rep(NA, 100)
-for(j in seq_along(walk_out_money)){
-  walk_out_money[j] <- one_series(B = 200, W = 300, L = 1000, M = 100) %>% get_last
-}
 
 # Walk out money distribution
 hist(walk_out_money, breaks = 100)
@@ -182,7 +190,7 @@ L = 1000 changed to L=10, I hope to see that more people walk out with more than
 ```{r}
 
 # Simulation
-walk_out_money <- rep(NA, 100)
+walk_out_money <- rep(NA, 5000)
 for(j in seq_along(walk_out_money)){
   walk_out_money[j] <- one_series(B = 200, W = 300, L = 10, M = 100) %>% get_last
 }
@@ -207,7 +215,7 @@ avg.earn= NA
 
 for(i in c(1:length(max_num_plays))){
   #Simulation
-  walk_out_money <- rep(NA,100)
+  walk_out_money <- rep(NA,5000)
   for (j in seq_along(walk_out_money)){
     walk_out_money[j] <- one_series(B = 200, W= 300, L = max_num_plays[i], M = 100) %>% get_last
   }
@@ -224,7 +232,7 @@ plot(x=max_num_plays, y=avg.earn, type="l")
 
 ```{r}
 # Simulation
-num.plays <- rep(NA,100)
+num.plays <- rep(NA,5000)
 for(j in seq_along(num.plays)){
   num.plays[j] <- one_series(B = 200, W =300, L = 1000, M = 100) %>% length()
 }
@@ -238,8 +246,10 @@ hist(num.plays, breaks = 10)
 the mean number of plays is `r mean(num.plays)` , because this is so close to L=10 we know almost everyone is stopping because they reach the max of plays.
 
 # Conclusion
-Playing roulette in the (B = 200, W =300, L = 1000, M = 100 scenario is high risk to lose money. But when the L decreases, more people will walk out with extra money than the simulation mentioned before.
+Playing roulette in the B = 200, W =300, L = 1000, M = 100 scenario is high risk to lose money. But when the L decreases, more people will walk out with extra money than the simulation mentioned before.
 I do not think roulette is profitable in all situations. we could see the last but 2 graph, it shows the decreasing trend. the earning of game is lower than 0.
 
 # Limitation
-the conclusion might be biased if we do not simulate a large amount of people participant in the roulette.
+1.the conclusion might be biased if we do not simulate a large amount of people participant in the roulette.
+
+2.The Martingale strategy appears to always end in positive earnings, regardless of how unlucky a string of spins may be. the best case scenario is that we have 10 number of plays, the average earning is estimated 0, in the other case, the walk out money always negative.
