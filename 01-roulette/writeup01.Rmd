@@ -11,36 +11,16 @@ output:
     toc_float: true
 ---
 
-incomplete. Please follow assignment instructions:
-
-You should explain how you used computer simulation to calculate the
-average earnings of a gambler that uses this strategy. As part of
-the explanation, provide a figure (or a series of figures) that show
-how the gamblers earnings (or losses) evolve over a series of wagers
-at the roulette wheel. (The x-axis will be the wager number (or play
-number), the y-axis will be earnings.) The code below provides all
-the functions you’ll need to calculate average earnings.
-
-Show your audience how changing a parameter of the simulation (see
-table below) does or does not have an impact on average earnings. A
-figure would be helpful.
-
-See the stopping rule below. Explain to your audience how you used
-computer simulation to estimate the average number of plays before
-stopping. The code below will need to be modified to calculate this
-quantity.
-
-Be sure to explain the limitations of the simulation; identify
-simplifications or other sources of uncertainty.
-
 ```{r global options, include = FALSE}
 knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
 ```
 
 # Introduction
+
 There are several strategies for playing roulette. (Strategies is in italics because the house always wins, in the long run.) Consider one such strategy:“Martingale” strategy.
 
 ## Background
+
 Here is an image could help you understand"Martingale":
 
 ![Caption: Image of Martingale.](/Users/sevenlv/Projects/probability-and-inference-portfolio-wenqi-lyu/01-roulette/martingale-strategy.svg){#id .class width=50% height=50%}
@@ -154,11 +134,12 @@ for(j in seq_along(walk_out_money)){
 
 
 ```
-* Explanation of plots: These plots show three different people plat roulette. 
-1st people: the more he/she plays, the more money in his/her pocket.
-2nd people: he/she could earn money from roulette before about 175 times he/she plays. Then, he/she lose money.
-3rd people: he/she almost do not lose money and earn money from this game, but when he/she plays over 15 times, he/she lose money.
-* Explanation of Tomas code: It shows that one person has $200 starting budget, when he/she earn $100, or they do not have any money, he/she will stop playing this game. maximum number of plays is 1000, and wager limit is 100. The probability of red is 18/38. 
+Explanation of plots: These plots show three different people plat roulette. 
+* 1st people: the more he/she plays, the more money in his/her pocket.
+* 2nd people: he/she could earn money from roulette before about 175 times he/she plays. Then, he/she lose money.
+* 3rd people: he/she almost do not lose money and earn money from this game, but when he/she plays over 15 times, he/she lose money.
+
+Explanation of Tomas code: It shows that one person has $200 starting budget, when he/she earn $100, or they do not have any money, he/she will stop playing this game. maximum number of plays is 1000, and wager limit is 100. The probability of red is 18/38. 
 The estimated probability of walking out with extra cash is `r mean(walk_out_money > 200)`. The estimated earnings would be on average `r mean(walk_out_money - 200)`. 
 we see on average we walk out with more money more than 1/2 of the time but our earnings are still negative. I would say these parameters show the gambling game is not safe and I still hope you not to play.
 
@@ -186,7 +167,9 @@ The Estimate probability of walking out with extra cash is `r mean(walk_out_mone
 
 ## Changing the the maximum number of plays 
 
+
 L = 1000 changed to L=10, I hope to see that more people walk out with more than $0
+
 ```{r}
 
 # Simulation
@@ -204,6 +187,7 @@ hist(walk_out_money, breaks = 100)
 # Estimated earnings
 #mean(walk_out_money - 200)
 ```
+
 The Estimate probability of walking out with extra cash is `r mean(walk_out_money > 200)`. The Estimate earnings would be on average `r mean(walk_out_money - 200)`. more people will walk out with extra money than the simulation mentioned before.
 
 
@@ -223,10 +207,10 @@ for(i in c(1:length(max_num_plays))){
   avg.earn[i] = mean(walk_out_money - 200)
 }
 
-plot(x=max_num_plays, y=avg.earn, type="l")
+plot(x =max_num_plays, y=avg.earn, type="l")
 ```
 
-* Explanation of plot: The line graph shows the decreasing trend. The more time we plays, the lower earning we could get.
+Explanation of plot: The line graph shows the decreasing trend. The more time we plays, the lower earning we could get.
 
 # Stopping Rule
 
@@ -243,13 +227,15 @@ for(j in seq_along(num.plays)){
 hist(num.plays, breaks = 10)
 #mean(num.plays)
 ```
-the mean number of plays is `r mean(num.plays)` , because this is so close to L=10 we know almost everyone is stopping because they reach the max of plays.
+
+the mean number of plays is `r mean(num.plays)` , they are estimated play `r mean(num.plays)` times either win $300 or lose $200.
 
 # Conclusion
+
 Playing roulette in the B = 200, W =300, L = 1000, M = 100 scenario is high risk to lose money. But when the L decreases, more people will walk out with extra money than the simulation mentioned before.
+
 I do not think roulette is profitable in all situations. we could see the last but 2 graph, it shows the decreasing trend. the earning of game is lower than 0.
 
 # Limitation
-1.the conclusion might be biased if we do not simulate a large amount of people participant in the roulette.
 
-2.The Martingale strategy appears to always end in positive earnings, regardless of how unlucky a string of spins may be. the best case scenario is that we have 10 number of plays, the average earning is estimated 0, in the other case, the walk out money always negative.
+1.the conclusion might be biased if we do not simulate a large amount of people participant in the roulette.2.The Martingale strategy appears to always end in positive earnings, regardless of how unlucky a string of spins may be. the best case scenario is that we have 10 number of plays, the average earning is estimated 0, in the other case, the walk out money always negative.
