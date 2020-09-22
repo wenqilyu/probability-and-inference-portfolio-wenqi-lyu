@@ -2,10 +2,22 @@
 title: "02-monte-carlo-error"
 author: "Wenqi Lyu"
 date: "9/7/2020"
-output: github_document
-  
+output: 
+  html_document: 
+    code_folding: hide
+    toc: yes
+    number_sections: true
+    toc_depth: 3
+    toc_float: true
+
+
 ---
+
+Monte Carlo Standard Error is a way to estimate the error Monte Carlo samples.Differnet sample size and probability might result in different output.
+
 # Plot
+In this simulation, the would like to see how the MAE and MRE changes when the sample size and the probability change.
+
 ```{r global options, include = FALSE}
 knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
 ```
@@ -137,6 +149,8 @@ for(i in 1:nrow(simulation_settings)){
 
 ## Absolute Error
 
+absolute error = |p̂−p|
+
 ```{r}
 simulation_settings %>%
   mutate(col = factor(p) %>% as.numeric) %>%
@@ -159,8 +173,11 @@ title(ylab = "MAE",line = 2)
 title(xlab = "Sample Size", line = 1.5)
 ```
 
+Absolute error is the absolute difference between the inferred value of a quantity and its actual value. In this plot, we could see that the larger sample size is, the less MAE is. The less probability is, the less MAE is.
 
 ## Relative Error
+
+Relative error = |p̂−p|/p.
 
 ```{r}
 
@@ -186,3 +203,4 @@ title(xlab = "Sample Size", line = 1.5)
 
 ```
 
+From the formula above, we could know that Relative error = Absolute error / p. We could also see the same trend in relative error that the larger sample size is, the less MRE. Besides, the bigger probability is, the less MRE is.
