@@ -13,9 +13,15 @@ output:
 
 ---
 
-Monte Carlo Standard Error is a way to estimate the error Monte Carlo samples.Differnet sample size and probability might result in different output.
+Monte Carlo Standard Error is a way to estimate the error Monte Carlo samples.Different sample size and probability might result in different output.
+
+MAE:Mean Absolute Error. Because the error value of average error has positive and negative, sometimes it will cancel each other in algebraic summation, so it can not accurately display the error, and the mean absolute error can accurately reflect the size of prediction error, to a certain extent, overcome the defect of average error.
+
+MRE:Mean Relative Error, we should first calculate the absolute error, Relative error shows the ratio of absolute error to the total size of the measured object. It could more accurately show whether the error is "big" or "small". RE is the percentage.
+
 
 # Plot
+
 In this simulation, the would like to see how the MAE and MRE changes when the sample size and the probability change.
 
 ```{r global options, include = FALSE}
