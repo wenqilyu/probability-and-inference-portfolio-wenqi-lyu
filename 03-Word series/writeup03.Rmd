@@ -2,49 +2,51 @@
 title: "writeup03"
 author: "Wenqi Lyu"
 date: "9/20/2020"
-output: github_document
+output: 
+  html_document: 
+    code_folding: hide
+    toc: yes
+    number_sections: true
+    toc_depth: 3
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-In this assignment, you will write a blog post to answer a series of
-questions related to the World Series. You will use the rules of
-probability and discrete probability functions to answer the questions.
-The audience of your blog post is an HR manager tasked with hiring a
-data scientist. The HR manager is looking for candidates that can take a
-data science concept and will explain the question and explain the
-solution in a way that is accessible to a general audience. **Be sure**
-to mention any assumptions of your solution.
+In this blog, we would like to discuss the probability that the Brave win the world series game.
 
-Setup:
+# Introduction
 
-1.  Suppose that the Braves and the Yankees are teams competing in the
-    World Series.
-2.  Suppose that in any given game, the probability that the Braves win
-    is *P*<sub>*B*</sub> and the probability that the Yankees win is
-    *P*<sub>*Y*</sub> = 1 − *P*<sub>*B*</sub>.
+In the beginning, we have these setup:
 
-Questions to answer:
+1.  Suppose that the Braves and the Yankees are teams competing in the World Series.
+    
+2.  Suppose that in any given game, the probability that the Braves win is *P*<sub>*B*</sub> and the probability that the Yankees win is *P*<sub>*Y*</sub> = 1 − *P*<sub>*B*</sub>.
+    
+3.  The world series is a best-of-7 match-up between the champions of the American and National Leagues of Major League Baseball. 
 
 ```{r}
 library(ggplot2)
 ```
 
+Now, we have following questions that need to address, so that we could understand the probability of winning world series better.
 
-1.  What is the probability that the Braves win the World Series given
-    that *P*<sub>*B*</sub> = 0.55?
+# Questions
+
+## What is the probability that the Braves win the World Series given that *P*<sub>*B*</sub> = 0.55?
 
 ```{r}
-pnbinom(3,4,.55)
+win <- pnbinom(3,4,.55)
 ```
 
-2.  What is the probability that the Braves win the World Series given
-    that *P*<sub>*B*</sub> = *x*? This will be a figure (see below) with
-    *P*<sub>*B*</sub> on the x-axis and *P*(Braves win World Series) on
-    the y-axis.
-    
+The probability that the Braves win the World Series given that *P*<sub>*B*</sub> = 0.55 is `r win`
+
+## What is the probability that the Braves win the World Series given that *P*<sub>*B*</sub> = *x*? This will be a figure (see below) with *P*<sub>*B*</sub> on the x-axis and *P*(Braves win World Series) on the y-axis.
+
+We want to find out the relationship between the probability that the Brave win the head-to-head matchup and the probability that Brave win the world series. Therefore, we make a plot.
+
 ```{r}
 pb <- seq(0.5,1,by = 0.01)
 brave_win <- pnbinom(3,4,pb)
@@ -59,11 +61,9 @@ plot(x=pb,
      main = "Probability of winning the World Series")
 ```
 
-* When the probability of braves winning a hiead-to-head matchup increases, the probability of Braves win world series increase.
+* In this plot, When the probability of braves winning a head-to-head matchup increases, the probability of Braves win world series increase.
 
-3.  Suppose one could change the World Series to be best-of-9 or some
-    other best-of-X series. What is the shortest series length so that
-    *P*(Braves win World Series\|*P*<sub>*B*</sub> = .55) ≥ 0.8
+## Suppose one could change the World Series to be best-of-9 or some other best-of-X series. What is the shortest series length so that *P*(Braves win World Series\|*P*<sub>*B*</sub> = .55) ≥ 0.8
 
 ```{r}
 x <- seq(1,99,2)
@@ -72,12 +72,9 @@ x[(which(prob_win>0.8))[1]]
 
 ```
 
-71 is the shortest series length so that *P*(Braves win World Series\|*P*<sub>*B*</sub> = .55) ≥ 0.8
+* 71 is the shortest series length so that *P*(Braves win World Series\|*P*<sub>*B*</sub> = .55) ≥ 0.8
 
-4.  What is the shortest series length so that
-    *P*(Braves win World Series\|*P*<sub>*B*</sub> = *x*) ≥ 0.8? This
-    will be a figure (see below) with *P*<sub>*B*</sub> on the x-axis
-    and series length is the y-axis.
+## What is the shortest series length so that *P*(Braves win World Series\|*P*<sub>*B*</sub> = *x*) ≥ 0.8? This will be a figure (see below) with *P*<sub>*B*</sub> on the x-axis and series length is the y-axis.
     
 ```{r}
 pb = seq(0.51,1,by=0.01)
@@ -100,13 +97,15 @@ plot(
 )
 ```
 
+* In this plot, we could know that the series length are almost 0, when the probaility of the Braves winning a head-to-head matchup is close to 1. 
 
-5.  Calculate
-    *P*(*P*<sub>*B*</sub> = 0.55\|Braves win World Series in 7 games)
-    under the assumption that either *P*<sub>*B*</sub> = 0.55 or
-    *P*<sub>*B*</sub> = 0.45. Explain your solution.
+## Calculate *P*(*P*<sub>*B*</sub> = 0.55\|Braves win World Series in 7 games) under the assumption that either *P*<sub>*B*</sub> = 0.55 or *P*<sub>*B*</sub> = 0.45. Explain your solution.
+
+From the concept of the conditional probability, we could know: 
 
 *P*(*P*<sub>*B*</sub> = 0.55\|Braves win World Series in 7 games) = *P*(*P*<sub>*B*</sub> = 0.55\,Braves win World Series in 7) / *P*(Braves win World Series in 7 games) = *P*(Braves win World Series in 7 games| *P*<sub>*B*</sub> = 0.55\) * *P*<sub>*B*</sub> = 0.55 / *P*(Braves win World Series in 7 games) 
+
+In order to know*P*(*P*<sub>*B*</sub> = 0.55\|Braves win World Series in 7 games), we need to find out *P*(Braves win World Series in 7 games| *P*<sub>*B*</sub> = 0.55\) ; *P*(Braves win World Series in 7 games) ; *P*<sub>*B*</sub> = 0.55 
 
 1.*P*(Braves win World Series in 7 games| *P*<sub>*B*</sub> = 0.55\) 
 ```{r}
