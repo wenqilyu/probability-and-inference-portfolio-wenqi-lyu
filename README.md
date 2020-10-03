@@ -11,7 +11,7 @@
 
 ## World Series
 
-[World Series]（https://github.com/wenqilyu/probability-and-inference-portfolio-wenqi-lyu/blob/master/03-Word%20series/writeup03.Rmd）
+[World Series](https://github.com/wenqilyu/probability-and-inference-portfolio-wenqi-lyu/blob/master/03-Word%20series/writeup03.Rmd)
 
 ## Home field advantage
 
