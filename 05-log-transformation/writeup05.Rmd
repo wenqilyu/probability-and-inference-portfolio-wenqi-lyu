@@ -1,0 +1,201 @@
+---
+title: "writeuo-05"
+output: 
+  html_document: 
+    code_folding: hide
+    toc: yes
+    number_sections: true
+    toc_depth: 3
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Log Transformation
+
+## GAMMA Distribution
+
+### PDF and CDF
+
+```{r}
+# generate PDF and CDF of GAMMA Distribution
+shap = 3
+scal = 1
+x=seq(0,10,by=0.5)
+# pdf of gamma distribution
+pdf = dgamma(x, shape = shap, scale = scal)
+# mean and median gamma distribution
+mean.gamma = shap*scal
+median.gamma = qgamma(0.5, shape = shap, scale = scal)
+# plot pdf
+plot(x,pdf,type = "l",main = "PDF of the GAMMA Distribution")
+abline(v = mean.gamma, col = "red")
+abline(v = median.gamma, col = "blue")
+# plot cdf
+x.gam.cdf = seq(0,15,by = 0.1)
+cdf = pgamma(x.gam.cdf, shape = shap, scale = scal)
+plot(x.gam.cdf,cdf,type = "l",main = "CDF of the GAMMA Distribution")
+```
+
+### Log transform
+
+```{r}
+data = rgamma(100000,shape = shap, scale = scal)
+hist(data,breaks = 100)
+plot(ecdf(data))
+
+log.gamma.data <- data^2
+hist(log.gamma.data,breaks = 100)
+plot(ecdf(log.gamma.data))
+```
+
+### Geometric and Arithmetic Mean
+
+```{r}
+art.mean = NA
+geo.mean = NA
+for (i in 1:1000) {
+  data = rgamma(n=10000, shape = shap, scale = scal)
+  art.mean[i] = mean(data)
+  geo.mean[i] = exp(mean(log(data)))
+}
+
+plot(geo.mean,art.mean)
+abline(0,1)
+
+hist(geo.mean)
+hist(art.mean)
+```
+
+
+## Log Normal Distribution
+
+```{r}
+data = rgamma(100000,shape = shap, scale = scal)
+hist(data,breaks = 100)
+plot(ecdf(data))
+
+log.gamma.data <- data^2
+hist(log.gamma.data,breaks = 100)
+plot(ecdf(log.gamma.data))
+```
+
+### PDF and CDF
+
+```{r}
+# generate PDF and CDF of lognorm Distribution
+mea = -1
+sd = 1
+x.lognorm=seq(0,12,by=0.5)
+# pdf of log normal distribution
+pdf.lognorm = dlnorm(x.lognorm, meanlog = mea, sdlog = sd)
+# mean and median log normal distribution
+mean.lognorm = mean(dlnorm(x.lognorm, meanlog = mea, sdlog = sd))
+median.lognorm = qlnorm(0.5, meanlog = mea, sdlog = sd)
+# plot pdf
+plot(x.lognorm,pdf.lognorm,type = "l",main = "PDF of the Log Normal Distribution")
+abline(v = mean.lognorm, col = "red")
+abline(v = median.lognorm, col = "blue")
+# plot cdf
+x.lognorm.cdf = seq(0,12,by = 0.1)
+cdf.lognorm= plnorm(x.lognorm.cdf, meanlog = mea, sdlog = sd)
+plot(x.lognorm.cdf,cdf.lognorm,type = "l",main = "CDF of the Log Normal Distribution")
+```
+
+### Log Transformation
+
+```{r}
+data.lognorm = rlnorm(100000,meanlog = mea, sdlog = sd)
+hist(data.lognorm ,breaks = 100)
+plot(ecdf(data.lognorm ))
+
+log.lognorm.data <- data.lognorm^2
+hist(log.lognorm.data,breaks = 100)
+plot(ecdf(log.lognorm.data))
+```
+
+### Geometric and Arithmetic Mean
+
+```{r}
+art.lognorm.mean = NA
+geo.lognorm.mean = NA
+for (i in 1:1000) {
+  data.lognorm = rlnorm(n=10000, meanlog = mea, sdlog = sd)
+  art.lognorm.mean[i] = mean(data.lognorm)
+  geo.lognorm.mean[i] = exp(mean(log(data.lognorm)))
+}
+
+plot(geo.lognorm.mean,art.lognorm.mean)
+abline(y=x)
+
+hist(geo.lognorm.mean)
+hist(art.lognorm.mean)
+```
+
+## Unifrom Distribution
+
+### PDF and CDF
+
+```{r}
+# generate PDF and CDF of Uniform Distribution
+mi = 0
+ma = 12
+x.unif=seq(0,12,by=0.5)
+# pdf of unifrom distribution
+pdf.unif = dunif(x.unif,min = mi,max = ma)
+# mean and median uniform distribution
+mean.unif = (mi + ma)/2
+median.unif = (mi + ma)/2
+# plot pdf
+plot(x.unif,pdf.unif,type = "l",main = "PDF of the Uniform Distribution")
+abline(v = mean.unif, col = "red")
+abline(v = median.unif, col = "blue")
+# plot cdf
+x.unif.cdf = seq(0,12,by = 0.1)
+cdf.unif = punif(x.unif.cdf, min = mi,max = ma)
+plot(x.unif.cdf,cdf.unif,type = "l",main = "CDF of the Uniform Distribution")
+```
+
+### Log transformation
+
+```{r}
+data.unif = runif(100000, min = mi,max = ma)
+hist(data.unif ,breaks = 100)
+plot(ecdf(data.unif ))
+
+log.unif.data <- data.unif^2
+hist(log.unif.data,breaks = 100)
+plot(ecdf(log.unif.data))
+```
+
+### Geometric and Arithmetic Mean
+
+```{r}
+unif.art.mean = NA
+unif.geo.mean = NA
+for (i in 1:1000) {
+  unif.data = runif(n=10000, min = mi,max = ma)
+  unif.art.mean[i] = mean(unif.data)
+  unif.geo.mean[i] = exp(mean(log(unif.data)))
+}
+
+plot(unif.geo.mean,unif.art.mean)
+lm(unif.geo.mean ~unif.art.mean)
+
+hist(unif.geo.mean)
+hist(unif.art.mean)
+```
+
+## Geometric Mean and Arithmetic Mean
+
+![Caption: Image of GAMA.](/Users/wenqi/Projects/probability-and-inference-portfolio-wenqi-lyu/05-log-transformation/AMGM.jpg)
+
+AM >= GM
+
+## E[log(x)] & log(E[X])
+
+![Caption: Image of log.](/Users/wenqi/Projects/probability-and-inference-portfolio-wenqi-lyu/05-log-transformation/log.jpg)
+
+log(E[X]) >= E[log(x)] 
