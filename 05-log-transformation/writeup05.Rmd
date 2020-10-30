@@ -39,6 +39,8 @@ cdf = pgamma(x.gam.cdf, shape = shap, scale = scal)
 plot(x.gam.cdf,cdf,type = "l",main = "CDF of the GAMMA Distribution")
 ```
 
+*  the red line in mean and the blue one is median
+
 ### Log transform
 
 ```{r}
@@ -46,7 +48,7 @@ data = rgamma(100000,shape = shap, scale = scal)
 hist(data,breaks = 100)
 plot(ecdf(data))
 
-log.gamma.data <- data^2
+log.gamma.data <- log(data)
 hist(log.gamma.data,breaks = 100)
 plot(ecdf(log.gamma.data))
 ```
@@ -57,7 +59,7 @@ plot(ecdf(log.gamma.data))
 art.mean = NA
 geo.mean = NA
 for (i in 1:1000) {
-  data = rgamma(n=10000, shape = shap, scale = scal)
+  data = rgamma(n=100, shape = shap, scale = scal)
   art.mean[i] = mean(data)
   geo.mean[i] = exp(mean(log(data)))
 }
@@ -77,7 +79,7 @@ data = rgamma(100000,shape = shap, scale = scal)
 hist(data,breaks = 100)
 plot(ecdf(data))
 
-log.gamma.data <- data^2
+log.gamma.data <- log(data)
 hist(log.gamma.data,breaks = 100)
 plot(ecdf(log.gamma.data))
 ```
@@ -104,6 +106,9 @@ cdf.lognorm= plnorm(x.lognorm.cdf, meanlog = mea, sdlog = sd)
 plot(x.lognorm.cdf,cdf.lognorm,type = "l",main = "CDF of the Log Normal Distribution")
 ```
 
+*  the red line in mean and the blue one is median
+
+
 ### Log Transformation
 
 ```{r}
@@ -111,7 +116,7 @@ data.lognorm = rlnorm(100000,meanlog = mea, sdlog = sd)
 hist(data.lognorm ,breaks = 100)
 plot(ecdf(data.lognorm ))
 
-log.lognorm.data <- data.lognorm^2
+log.lognorm.data <- log(data.lognorm)
 hist(log.lognorm.data,breaks = 100)
 plot(ecdf(log.lognorm.data))
 ```
@@ -122,13 +127,13 @@ plot(ecdf(log.lognorm.data))
 art.lognorm.mean = NA
 geo.lognorm.mean = NA
 for (i in 1:1000) {
-  data.lognorm = rlnorm(n=10000, meanlog = mea, sdlog = sd)
+  data.lognorm = rlnorm(n=100, meanlog = mea, sdlog = sd)
   art.lognorm.mean[i] = mean(data.lognorm)
   geo.lognorm.mean[i] = exp(mean(log(data.lognorm)))
 }
 
 plot(geo.lognorm.mean,art.lognorm.mean)
-abline(y=x)
+abline(0,1)
 
 hist(geo.lognorm.mean)
 hist(art.lognorm.mean)
@@ -158,6 +163,8 @@ cdf.unif = punif(x.unif.cdf, min = mi,max = ma)
 plot(x.unif.cdf,cdf.unif,type = "l",main = "CDF of the Uniform Distribution")
 ```
 
+*  the red line in mean and the blue one is median
+
 ### Log transformation
 
 ```{r}
@@ -165,7 +172,7 @@ data.unif = runif(100000, min = mi,max = ma)
 hist(data.unif ,breaks = 100)
 plot(ecdf(data.unif ))
 
-log.unif.data <- data.unif^2
+log.unif.data <- log(data.unif)
 hist(log.unif.data,breaks = 100)
 plot(ecdf(log.unif.data))
 ```
@@ -176,13 +183,13 @@ plot(ecdf(log.unif.data))
 unif.art.mean = NA
 unif.geo.mean = NA
 for (i in 1:1000) {
-  unif.data = runif(n=10000, min = mi,max = ma)
+  unif.data = runif(n=100, min = mi,max = ma)
   unif.art.mean[i] = mean(unif.data)
   unif.geo.mean[i] = exp(mean(log(unif.data)))
 }
 
 plot(unif.geo.mean,unif.art.mean)
-lm(unif.geo.mean ~unif.art.mean)
+abline(0,1)
 
 hist(unif.geo.mean)
 hist(unif.art.mean)
