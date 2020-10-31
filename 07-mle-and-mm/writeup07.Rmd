@@ -1,0 +1,62 @@
+---
+title: "writeup07"
+output: 
+  html_document: 
+    code_folding: hide
+    toc: yes
+    number_sections: true
+    toc_depth: 3
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+require(dplyr)
+Hmisc::getHdata(nhgh)
+d1 <- nhgh %>% 
+  filter(sex == "female") %>% 
+  filter(age >= 18) %>% 
+  select(gh, ht) %>% 
+  filter(1:n()<=1000)
+```
+
+# ht
+
+```{r}
+mm.gamma.shape = mean(d1$ht)^2/var(d1$ht)
+mm.gamma.scale=var(d1$ht)/mean(d1$h)
+
+mm.norm.mean=mean(d1$ht)
+mm.norm.sd=sd(d1$ht)
+
+hist(d1$ht, main = "Height of Adult Females: MM", breaks = 100, freq = FALSE)
+curve(dgamma(x, shape = mm.gamma.shape, scale = mm.gamma.scale), add = TRUE, col = "red")
+curve(dnorm(x, mm.norm.mean, mm.norm.sd), add = TRUE, col = "blue")
+```
+```{r}
+mean.weib = function(lambda, k){
+  lambda*gamma(1 + 1/k)
+}
+
+lambda = function(samp.mean, k){
+  samp.mean/gamma(1+1/k)
+}
+
+var.weib = function(samp.mean, k,samp.var){
+  (lambda(samp.mean, k))^2*(gamma(1+2/k)-(gamma(1+1/k))^2)-samp.var
+}
+
+
+mm.opt = optimize(f = function(x){abs(var.weib(k = x, samp.mean = mean(d1$ht), samp.var = var(d1$ht)))},lower = 10, upper = 100)
+mm.weib.k = mm.opt$minimum
+mm.weib.lambda= lambda(samp.mean = mean(d1$ht), k=mm.weib.k)
+
+hist(d1$ht, main = "Height of Adult Females: MM", breaks = 100, freq = FALSE)
+curve(dgamma(x, shape = mm.gamma.shape, scale = mm.gamma.scale), add = TRUE, col = "red")
+curve(dnorm(x, mm.norm.mean, mm.norm.sd), add = TRUE, col = "blue", lwd = 2)
+curve(dweibull(x, shape = mm.weib.k, scale = mm.weib.lambda),add = TRUE, col = "green",lwd = 2)
+```
+
