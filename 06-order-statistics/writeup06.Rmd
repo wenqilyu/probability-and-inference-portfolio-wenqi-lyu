@@ -1,55 +1,55 @@
 ---
 title: "writeup06"
-output: html_document
+output: 
+  html_document: 
+    code_folding: hide
+    toc: yes
+    number_sections: true
+    toc_depth: 3
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Questions
-Q: Begin with the median from a sample of N = 200 from the standard normal distribution. Write an R function that is the density function for the median in this sample. Note that the 100th order statistic is approximately the median, and use the order statistic formula discussed in class. Generate a plot of the function.
+# the initial median function and plot
+
+## Function
+
+The initial function about median: begin with the median from a sample of N = 200 from the standard normal distribution. Write an R function that is the density function for the median in this sample. 
+
+Here are those 3 functions:
 
 ```{r}
-dorder <- function(x, n, k){
-  k*choose(n,k)*
-    (pnorm(x))^(k-1)*
-    (1-pnorm(x))^(n-k)*
+dorder <- function(x){
+  100*choose(200,100)*
+    (pnorm(x))^(100-1)*
+    (1-pnorm(x))^(200-100)*
     dnorm(x)
 }
 
-x = seq(-4,4,by=0.1)
-plot(x,dorder(x,n=200,k=100),type = "l",main = "PDF of Order Statistics of Standard Normal Density")
+porder <- function(x){
+   pbinom(100-1,200,pnorm(x,0,1),lower.tail = FALSE)
+}
 ```
-Q: Write an R function that is the probability function for the median in this sample. Use the order statistic formula discussed in class. Generate a plot of the function.
+
 ```{r}
-porder <- function(x,n,k){
+porder1 <- function(x,n,k){
   pbinom(k-1,n,pnorm(x,0,1),lower.tail = FALSE)
 }
-
-curve(
-  porder(x,n = 200,k = 100)
-  , -4
-  , 4
-  , xlab = parse(text = "x[(100)]")
-  , ylab = "Probability"
-)
-
-```
-Q: Write an R function that is the quantile function for the median in this sample. (You have several options for how to write this function.) Generate a plot of the function.
-```{r}
-qorder <- function(p, n, k){
+qorder1 <- function(p, n, k){
   out <- p
   for (i in seq_along(p)) {
-    out[i] <- uniroot(function(x){porder(x,n,k)-p[i]},c(-100,100))$root
+    out[i] <- uniroot(function(x){porder1(x,n,k)-p[i]},c(-100,100))$root
   }
   out
 }
-
-p <- seq(0.05,0.95,by = 0.01)
-plot(p,qorder(p,n = 200,k = 100),type = "l")
 ```
-Q: Simulate the sampling distribution for the median. Create a plot of the empirical CDF (ECDF). Overlay the plot of the ECDF with a plot of the CDF.
+
+## CDF and ECDF plot:
+
+* red line is the CDF
 
 ```{r}
 samp = NA
@@ -57,41 +57,130 @@ for (i in 1:1000) {
   data <- rnorm(200)
   samp[i] = median(data)
 }
-plot(ecdf(samp),col = "red")
+
+x = seq(-4,4,by=0.1)
+plot(x,porder(x),type = "l",main = "CDF and ECDFof Order Statistics of Standard Normal Density",xlim = c(-0.3,0.3),col = "red")
+plot(ecdf(samp),add = TRUE)
 ```
 
-
-Q: Using the simulated sampling distribution from the previous question, create a histogram (on the density scale). Overlay the histogram with a plot of the density function.
+## Hist and PDF
 
 ```{r}
-hist(samp,freq = FALSE)
+plot(x,dorder(x),type = "l",main = "PDF of Order Statistics of Standard Normal Density",xlim = c(-0.5,0.5),col = "red")
+hist(samp,freq = FALSE,add = TRUE,breaks = 100)
+```
+
+## QQPlot of Median
+
+```{r}
+p <- seq(0.05,0.95,by=0.01)
+samp1 = NA
+for (i in seq_along(p)) {
+  data <- rnorm(200)
+  samp1[i] = median(data)
+}
+x <- qorder1(p,n = 200,k = 100)
+y <- quantile(samp1, probs = p)
+
+plot(x,y)
+abline(0,1)
+
 ```
 
 
-Q: One very common way to compare a random sample to a theoretical candidate distribution is the QQ plot. It is created by ploting quantiles of the theoretical distribution on the x-axis and empirical quantiles from the sample on the y-axis.
 
-If sample and theoretical quantiles come from the same distribution, then the plotted points will fall along the line y = x, approximately. Here are two examples when the sample and theoretical quantiles came from the same distribution.
+# Modified function
+
+## Function
+
+* Modify the dorder, porder, and qorder functions so that the functions take a new parameter k (for the kt**h order statistic) so that the functions will work for any order statistic and not just the median.
+
+```{r}
+dorder1 <- function(x, n, k){
+  k*choose(n,k)*
+    (pnorm(x))^(k-1)*
+    (1-pnorm(x))^(n-k)*
+    dnorm(x)
+}
+```
+
+```{r}
+porder1 <- function(x,n,k){
+  pbinom(k-1,n,pnorm(x,0,1),lower.tail = FALSE)
+}
+```
+
+```{r}
+qorder1 <- function(p, n, k){
+  out <- p
+  for (i in seq_along(p)) {
+    out[i] <- uniroot(function(x){porder1(x,n,k)-p[i]},c(-100,100))$root
+  }
+  out
+}
+```
+
+## QQPlot
 
 
-random_sample <- rexp(200)
-q_candidate <- qexp
+```{r}
+samp2 = NA
+for (i in seq_along(p)) {
+  data <- rnorm(200)
+  samp2[i] = max(data)
+}
+x <- qorder1(p,n = 200,k = 200)
+y <- quantile(samp2, probs = p)
 
-x <- q_candidate((1:200)/200)
-y <- quantile(random_sample, probs = (1:200)/200)
-
-svg("./assets/exponential-qq.svg", width = 5, height = 3)
-tgsify::plotstyle(style = upright)
-plot(x,y, asp = 1)
+plot(x,y)
 abline(0,1)
-dev.off()
-random_sample <- rnorm(200)
-q_candidate <- qnorm
+```
 
-x <- q_candidate((1:200)/200)
-y <- quantile(random_sample, probs = (1:200)/200)
 
-svg("./assets/normal-qq.svg", width = 5, height = 3)
-tgsify::plotstyle(style = upright)
-plot(x,y, asp = 1, xlab = "Theoretical quantile", ylab = "Sample quantile")
-abline(0,1)
-dev.off()
+# Modified the function again
+
+## Function
+
+* Modify the dorder, porder, and qorder functions so that the functions take new parameters dist and ... so that the functions will work for any continuous distribution that has d and p functions defined in R.
+
+```{r}
+dorder2 <- function(x, k, n, dist = "norm", ...){
+  pf <- get(paste0("p",dist))
+  df <- get(paste0("d",dist))
+  
+  k*
+    choose(n,k)*
+    pf(x, ...)^(k-1)*
+    (1-pf(x, ...))^(n-k)*
+    df(x, ...)
+}
+
+porder2 <- function(x, k, n, dist = "norm", ...){
+  pf <- get(paste0("p",dist))
+  pbinom(k-1, n, pf(x,...),lower.tail = FALSE)
+}
+
+qorder2 <- function(p, k, n, dist = "norm", ...){
+  out <- p
+  for (i in seq_along(p)) {
+    out[i] <- uniroot(function(x){porder(x,k,n,dist,...) - p[i]},c(-100,100))$root
+    
+  }
+  out
+}
+
+```
+
+## CDF and PDF
+
+```{r}
+p <- ppoints(200)
+xmin <- p
+ymin <- porder2(p,k=1, n=200,dist = "gamma",shape=2)
+plot(xmin,ymin,type = "l")
+
+xmin1 <- p
+ymin1 <- dorder2(p,k=1, n=200,dist = "gamma",shape=2)
+plot(xmin1,ymin1,type = "l")
+```
+
