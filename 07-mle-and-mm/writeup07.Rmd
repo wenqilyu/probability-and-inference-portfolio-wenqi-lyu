@@ -25,6 +25,10 @@ d1 <- nhgh %>%
 
 # ht
 
+## MM
+
+### Estimates of parameters
+
 ```{r}
 mm.gamma.shape = mean(d1$ht)^2/var(d1$ht)
 mm.gamma.scale=var(d1$ht)/mean(d1$h)
@@ -32,11 +36,6 @@ mm.gamma.scale=var(d1$ht)/mean(d1$h)
 mm.norm.mean=mean(d1$ht)
 mm.norm.sd=sd(d1$ht)
 
-hist(d1$ht, main = "Height of Adult Females: MM", breaks = 100, freq = FALSE)
-curve(dgamma(x, shape = mm.gamma.shape, scale = mm.gamma.scale), add = TRUE, col = "red")
-curve(dnorm(x, mm.norm.mean, mm.norm.sd), add = TRUE, col = "blue")
-```
-```{r}
 mean.weib = function(lambda, k){
   lambda*gamma(1 + 1/k)
 }
@@ -49,7 +48,11 @@ var.weib = function(samp.mean, k,samp.var){
   (lambda(samp.mean, k))^2*(gamma(1+2/k)-(gamma(1+1/k))^2)-samp.var
 }
 
+```
 
+### Overlay estimated pdf onto histogram
+
+```{r}
 mm.opt = optimize(f = function(x){abs(var.weib(k = x, samp.mean = mean(d1$ht), samp.var = var(d1$ht)))},lower = 10, upper = 100)
 mm.weib.k = mm.opt$minimum
 mm.weib.lambda= lambda(samp.mean = mean(d1$ht), k=mm.weib.k)
@@ -58,5 +61,111 @@ hist(d1$ht, main = "Height of Adult Females: MM", breaks = 100, freq = FALSE)
 curve(dgamma(x, shape = mm.gamma.shape, scale = mm.gamma.scale), add = TRUE, col = "red")
 curve(dnorm(x, mm.norm.mean, mm.norm.sd), add = TRUE, col = "blue", lwd = 2)
 curve(dweibull(x, shape = mm.weib.k, scale = mm.weib.lambda),add = TRUE, col = "green",lwd = 2)
+
+```
+
+* the red line is gamma, the blue line is norm and the green line is weibull
+
+### Overlay estimated CDF onto eCDF
+
+```{r}
+plot(ecdf(d1$ht), main = "The CDF and ECDF of ht: MM")
+curve(pgamma(x, shape = mm.gamma.shape, scale = mm.gamma.scale), add = TRUE, col = "red")
+curve(pnorm(x, mm.norm.mean, mm.norm.sd), add = TRUE, col = "blue", lwd = 2)
+curve(pweibull(x, shape = mm.weib.k, scale = mm.weib.lambda),add = TRUE, col = "green",lwd = 2)
+```
+
+* the red line is gamma, the blue line is norm and the green line is weibull
+
+### QQ plot (sample vs estimated dist)
+
+```{r}
+p = ppoints(300)
+y = quantile(d1$ht, probs = p)
+#gamma
+x.gamma.mm = qgamma(p, shape = mm.gamma.shape, scale = mm.gamma.scale)
+plot(x.gamma.mm,y,main = "Gamma QQplot")
+abline(0,1)
+#norm
+x.norm.mm = qnorm(p, mm.norm.mean, mm.norm.sd)
+plot(x.norm.mm,y,main = "Norm QQplot")
+abline(0,1)
+#weibull
+x.pwei.mm=qweibull(p, shape = mm.weib.k, scale = mm.weib.lambda)
+plot(x.pwei.mm,y,main = "Weibull QQplot")
+abline(0,1)
+```
+
+* the red line is gamma, the blue line is norm and the green line is weibull
+
+### Estimated Median
+
+```{r}
+median(d1$ht)
+qweibull(0.5, shape = mm.weib.k, scale = mm.weib.lambda)
+qgamma(0.5, shape = mm.gamma.shape, scale = mm.gamma.scale)
+qnorm(0.5, mm.norm.mean, mm.norm.sd)
+```
+
+* we could know that the median of ht is `r median(d1$ht)` , and the norm median is `r qnorm(0.5, mm.norm.mean, mm.norm.sd)`, the gamma median is `r qgamma(0.5, shape = mm.gamma.shape, scale = mm.gamma.scale)`, and the qweibull median is `r qweibull(0.5, shape = mm.weib.k, scale = mm.weib.lambda)`
+
+### Median Samp Dist (hist)
+
+```{r}
+#gamma
+med.gam = NA
+for (i in 1:1000) {
+  data = rgamma(200, shape = mm.gamma.shape, scale = mm.gamma.scale)
+  med.gam[i] = median(data)
+}
+hist(med.gam,breaks = 100,main = "Histogram of median of gamma distribution")
+
+#norm
+med.norm = NA
+for (i in 1:1000) {
+  data = rnorm(200, mm.norm.mean, mm.norm.sd)
+  med.norm[i] = median(data)
+}
+hist(med.norm,breaks = 100,main = "Histogram of median of normal distribution")
+
+#
+med.wei = NA
+for (i in 1:1000) {
+  data = rweibull(200, shape = mm.weib.k, scale = mm.weib.lambda)
+  med.wei[i] = median(data)
+}
+hist(med.wei,breaks = 100,main = "Histogram of median of weibull distribution")
+```
+
+### Range of middle 95% of Samp Dist
+
+```{r}
+diff(quantile(med.gam,probs = c(0.025,0.975)))
+diff(quantile(med.norm,probs = c(0.025,0.975)))
+diff(quantile(med.wei,probs = c(0.025,0.975)))
+```
+
+* Range of middle 95% of Samp Dist of gamma is `r diff(quantile(med.gam,probs = c(0.025,0.975)))`, norm is `r diff(quantile(med.norm,probs = c(0.025,0.975)))`, and the weibull is `r diff(quantile(med.wei,probs = c(0.025,0.975)))`
+
+
+## MLE
+
+```{r}
+library(stats4)
+nLL <- function(mean, sd){
+  fs <- dnorm(
+    x = d1$ht
+    ,mean = mean
+    ,sd = sd
+    ,log = TRUE
+  )
+  -sum(fs)
+}
+fit <- mle(
+  nLL
+  ,start = list(mean = 1, sd = 1)
+  ,method = "L-BFGS-B"
+  ,lower = c(0,0.01)
+)
 ```
 
