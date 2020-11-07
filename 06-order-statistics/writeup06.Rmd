@@ -29,9 +29,16 @@ dorder <- function(x){
     dnorm(x)
 }
 
+x <- seq(-4,4,by=0.1)
+plot(x,dnorm(x,0,1),type = "l",main = "Standard Normal Distribution")
+plot(x,dorder(x),type = "l",main = "PDF of Median Order of Standard Normal Distribution")
+```
+
+```{r}
 porder <- function(x){
    pbinom(100-1,200,pnorm(x,0,1),lower.tail = FALSE)
 }
+curve(porder(x),-1,1,xlab=parse(text="x[(100)]"),ylab=("Probability"),main = "CDF of Median Order of Standard Normal Distribution")
 ```
 
 ```{r}
@@ -45,7 +52,13 @@ qorder1 <- function(p, n, k){
   }
   out
 }
+
+p <- seq(0.05,0.95,by=0.01)
+plot(p,qorder1(p,200,100),type = "l",ylab=parse(text="x[(100)]"),xlab=("Probability"),main = "Quantile of the median")
 ```
+
+
+
 
 ## CDF and ECDF plot:
 
@@ -67,7 +80,7 @@ plot(ecdf(samp),add = TRUE)
 
 ```{r}
 plot(x,dorder(x),type = "l",main = "PDF of Order Statistics of Standard Normal Density",xlim = c(-0.5,0.5),col = "red")
-hist(samp,freq = FALSE,add = TRUE,breaks = 100)
+hist(samp,freq = FALSE,add = TRUE,breaks = 30,)
 ```
 
 ## QQPlot of Median
@@ -171,16 +184,11 @@ qorder2 <- function(p, k, n, dist = "norm", ...){
 
 ```
 
-## CDF and PDF
+## CDF and PDF of the min of Standard Normal Distribution
 
 ```{r}
-p <- ppoints(200)
-xmin <- p
-ymin <- porder2(p,k=1, n=200,dist = "gamma",shape=2)
-plot(xmin,ymin,type = "l")
+curve(dorder2(x,n=200,k=1,dist="norm"),-5,5,ylab=("Density"),main = "PDF of min of Standard Normal Distribution")
 
-xmin1 <- p
-ymin1 <- dorder2(p,k=1, n=200,dist = "gamma",shape=2)
-plot(xmin1,ymin1,type = "l")
+curve(porder2(x,n=200,k=1,dist="norm"),-5,5,ylab=("Probablity"),main = "CDF of min of Standard Normal Distribution")
 ```
 
