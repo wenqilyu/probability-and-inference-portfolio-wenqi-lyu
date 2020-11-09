@@ -5,7 +5,7 @@ output:
     code_folding: hide
     toc: yes
     number_sections: true
-    toc_depth: 3
+    toc_depth: 4
     toc_float: true
 ---
 
@@ -69,10 +69,10 @@ curve(dweibull(x, shape = mm.weib.k, scale = mm.weib.lambda),add = TRUE, col = "
 ### Overlay estimated CDF onto eCDF
 
 ```{r}
-plot(ecdf(d1$ht), main = "The CDF and ECDF of ht: MM")
-curve(pgamma(x, shape = mm.gamma.shape, scale = mm.gamma.scale), add = TRUE, col = "red")
-curve(pnorm(x, mm.norm.mean, mm.norm.sd), add = TRUE, col = "blue", lwd = 2)
-curve(pweibull(x, shape = mm.weib.k, scale = mm.weib.lambda),add = TRUE, col = "green",lwd = 2)
+plot(ecdf(d1$ht),main = "The CDF and ECDF of ht: MM")
+curve(pgamma(x, shape = mm.gamma.shape, scale = mm.gamma.scale), add = TRUE, col = "red",lwd = 6)
+curve(pnorm(x, mm.norm.mean, mm.norm.sd), add = TRUE, col = "blue", lwd = 4)
+curve(pweibull(x, shape = mm.weib.k, scale = mm.weib.lambda),add = TRUE, col = "green",lwd = 4)
 ```
 
 * the red line is gamma, the blue line is norm and the green line is weibull
@@ -96,7 +96,6 @@ plot(x.pwei.mm,y,main = "Weibull QQplot")
 abline(0,1)
 ```
 
-* the red line is gamma, the blue line is norm and the green line is weibull
 
 ### Estimated Median
 
@@ -150,6 +149,10 @@ diff(quantile(med.wei,probs = c(0.025,0.975)))
 
 ## MLE
 
+### Estimates of parameters
+
+#### Normal distribution
+
 ```{r}
 library(stats4)
 nLL <- function(mean, sd){
@@ -161,11 +164,540 @@ nLL <- function(mean, sd){
   )
   -sum(fs)
 }
+
 fit <- mle(
   nLL
+  ,start = list(mean = 160, sd = 5)
+  ,method = "L-BFGS-B"
+  ,lower = c(0,0.01)
+)
+```
+
+#### Gamma distribution
+
+```{r}
+nLL.gamma <- function(shape, scale){
+  fs <- dgamma(
+    x = d1$ht
+    ,shape = shape
+    ,scale = scale
+    ,log = TRUE
+  )
+  -sum(fs)
+}
+
+fit.gamma <- mle(
+  nLL.gamma
+  ,start = list(shape = 1, scale = 1)
+  ,method = "L-BFGS-B"
+  ,lower = c(0,0.01)
+)
+```
+
+#### Weibull distribution
+
+```{r}
+nLL.weibull <- function(shape, scale){
+  fs <- dweibull(
+    x = d1$ht
+    ,shape = shape
+    ,scale = scale
+    ,log = TRUE
+  )
+  -sum(fs)
+}
+
+fit.weibull <- mle(
+  nLL.weibull
+  ,start = list(shape = 1, scale = 1)
+  ,method = "L-BFGS-B"
+  ,lower = c(0,0.01)
+)
+```
+
+### Overlay estimated pdf onto histogram
+
+#### Normal distribution
+
+```{r}
+hist(d1$ht,breaks = 100, freq = FALSE,,main = "Overlay estimated pdf onto histogram of Normal distribution")
+curve(dnorm(x,mean = coef(fit)[1],sd =coef(fit)[2]),col = "red" ,add = TRUE, lwd = 4)
+```
+
+#### Gammal distribution
+
+```{r}
+hist(d1$ht,breaks = 100, freq = FALSE,,main = "Overlay estimated pdf onto histogram of Gamma distribution")
+curve(dgamma(x,shape = coef(fit.gamma)[1],scale =coef(fit.gamma)[2]),col = "blue" ,add = TRUE, lwd = 4)
+```
+
+#### Weibull distribution
+
+```{r}
+hist(d1$ht,breaks = 100, freq = FALSE,main = "Overlay estimated pdf onto histogram of Weibull distribution")
+curve(dweibull(x,shape = coef(fit.weibull)[1],scale =coef(fit.weibull)[2]),col = "green" ,add = TRUE, lwd = 4)
+```
+
+### Overlay estimated CDF onto eCDF
+
+#### Normal distribution
+
+```{r}
+plot(ecdf(d1$ht),,main = "Overlay estimated CDF onto eCDF of normal distribution")
+curve(pnorm(x,mean = coef(fit)[1],sd =coef(fit)[2]),col = "red" ,add = TRUE, lwd = 4)
+```
+
+#### Gamma distribution
+
+```{r}
+plot(ecdf(d1$ht),,main = "Overlay estimated CDF onto eCDF of gamma distribution")
+curve(pgamma(x,shape = coef(fit.gamma)[1],scale =coef(fit.gamma)[2]),col = "blue" ,add = TRUE, lwd = 4)
+```
+
+#### Weibull distribution
+
+```{r}
+plot(ecdf(d1$ht),,main = "Overlay estimated CDF onto eCDF of weibull distribution")
+curve(pweibull(x,shape = coef(fit.weibull)[1],scale =coef(fit.weibull)[2]),col = "green" ,add = TRUE, lwd = 4)
+```
+
+
+### QQ plot (sample vs estimated dist)
+
+#### Normal distribution
+
+```{r}
+qs <- seq(0.05,0.95,length = 100)
+samp_qs <- quantile(d1$ht,qs)
+theor_qs <- qnorm(qs,mean = coef(fit)[1],sd =coef(fit)[2])
+plot(samp_qs,theor_qs)
+abline(0,1)
+```
+
+#### Gamma distribution
+
+```{r}
+qs <- seq(0.05,0.95,length = 100)
+samp_qs.gamma <- quantile(d1$ht,qs)
+theor_qs.gamma <- qgamma(qs,shape = coef(fit.gamma)[1],scale =coef(fit.gamma)[2])
+plot(samp_qs.gamma,theor_qs.gamma)
+abline(0,1)
+```
+
+#### Weibull distribution
+
+```{r}
+qs <- seq(0.05,0.95,length = 100)
+samp_qs.w <- quantile(d1$ht,qs)
+theor_qs.w <- qweibull(qs,shape = coef(fit.weibull)[1],scale =coef(fit.weibull)[2])
+plot(samp_qs.w,theor_qs.w)
+abline(0,1)
+```
+
+
+### Estimated Median
+
+#### Normal distribution
+
+```{r}
+qnorm(0.5,mean = coef(fit)[1],sd = coef(fit)[2])
+```
+
+#### Gamma distribution
+
+```{r}
+qgamma(0.5,shape = coef(fit.gamma)[1],scale =coef(fit.gamma)[2])
+```
+
+#### Weibull distribution
+
+```{r}
+qweibull(0.5,shape = coef(fit.weibull)[1],scale =coef(fit.weibull)[2])
+```
+
+### Median Samp Dist (hist)
+
+#### Normal distribution
+
+```{r}
+M <- 500
+N <- 1000
+out <- rnorm(N*M,mean = coef(fit)[1],sd =coef(fit)[2])  %>%  array(dim = c(M,N))
+
+samp_dist <- apply(out,1,median)
+hist(samp_dist,breaks = 100,,main = "Median Samp Dist (hist) of normal distribution")
+```
+
+#### Gamma distribution
+
+```{r}
+M <- 500
+N <- 1000
+out <- rgamma(N*M,shape = coef(fit.gamma)[1],scale =coef(fit.gamma)[2])  %>%  array(dim = c(M,N))
+
+samp_dist.g <- apply(out,1,median)
+hist(samp_dist.g,breaks = 100,main = "Median Samp Dist (hist) of gamma distribution")
+```
+
+#### Weibull distribution
+
+```{r}
+M <- 500
+N <- 1000
+out <- rweibull(N*M,shape = coef(fit.weibull)[1],scale =coef(fit.weibull)[2])  %>%  array(dim = c(M,N))
+
+samp_dist.w <- apply(out,1,median)
+hist(samp_dist.w,breaks = 100,main = "Median Samp Dist (hist) of weibull distribution")
+```
+### Range of middle 95% of Samp Dist
+
+```{r}
+diff(quantile(samp_dist,c(0.05/2,1-0.05/2)))
+diff(quantile(samp_dist.g,c(0.05/2,1-0.05/2)))
+diff(quantile(samp_dist.w,c(0.05/2,1-0.05/2)))
+```
+
+* Range of middle 95% of Samp Dist of gamma is `r diff(quantile(samp_dist.g,c(0.05/2,1-0.05/2)))`, norm is `r diff(quantile(samp_dist,c(0.05/2,1-0.05/2)))`, and the weibull is `r diff(quantile(samp_dist.w,c(0.05/2,1-0.05/2)))`
+
+
+
+# gt
+
+## MM
+
+### Estimates of parameters
+
+
+```{r}
+#gamma
+mm.gamma.shape.g = mean(d1$gh)^2/var(d1$gh)
+mm.gamma.scale.g=var(d1$gh)/mean(d1$gh)
+#normal
+mm.norm.mean.g=mean(d1$gh)
+mm.norm.sd.g=sd(d1$gh)
+#weibull
+mean.weib.g = function(lambda, k){
+  lambda*gamma(1 + 1/k)
+}
+
+lambda.g = function(samp.mean, k){
+  samp.mean/gamma(1+1/k)
+}
+
+var.weib.g = function(samp.mean, k,samp.var){
+  (lambda(samp.mean, k))^2*(gamma(1+2/k)-(gamma(1+1/k))^2)-samp.var
+}
+
+mm.opt.g = optimize(f = function(x){abs(var.weib(k = x, samp.mean = mean(d1$gh), samp.var = var(d1$gh)))},lower = 10, upper = 100)
+mm.weib.k.g = mm.opt.g$minimum
+mm.weib.lambda.g= lambda(samp.mean = mean(d1$gh), k=mm.weib.k)
+```
+
+
+### Overlay estimated pdf onto histogram
+
+```{r}
+hist(d1$gh, main = "Height of Adult Females: MM", breaks = 100, freq = FALSE,xlim = c(3,12))
+curve(dgamma(x, shape = mm.gamma.shape.g, scale = mm.gamma.scale.g), add = TRUE, col = "red")
+curve(dnorm(x, mm.norm.mean.g, mm.norm.sd.g), add = TRUE, col = "blue", lwd = 2)
+curve(dweibull(x, shape = mm.weib.k.g, scale = mm.weib.lambda.g),add = TRUE, col = "green",lwd = 2)
+
+```
+
+* the red line is gamma, the blue line is norm and the green line is weibull
+
+### Overlay estimated CDF onto eCDF
+
+```{r}
+plot(ecdf(d1$gh),main = "The CDF and ECDF of ht: MM")
+curve(pgamma(x, shape = mm.gamma.shape.g, scale = mm.gamma.scale.g), add = TRUE, col = "red",lwd = 6)
+curve(pnorm(x, mm.norm.mean.g, mm.norm.sd.g), add = TRUE, col = "blue", lwd = 4)
+curve(pweibull(x, shape = mm.weib.k.g, scale = mm.weib.lambda.g),add = TRUE, col = "green",lwd = 4)
+```
+
+* the red line is gamma, the blue line is norm and the green line is weibull
+
+### QQ plot (sample vs estimated dist)
+
+```{r}
+p = ppoints(300)
+y.g = quantile(d1$gh, probs = p)
+#gamma
+x.gamma.mm.g = qgamma(p, shape = mm.gamma.shape.g, scale = mm.gamma.scale.g)
+plot(x.gamma.mm.g,y.g,main = "Gamma QQplot")
+abline(0,1)
+#norm
+x.norm.mm.g = qnorm(p, mm.norm.mean.g, mm.norm.sd.g)
+plot(x.norm.mm.g,y.g,main = "Norm QQplot")
+abline(0,1)
+#weibull
+x.pwei.mm.g=qweibull(p, shape = mm.weib.k.g, scale = mm.weib.lambda.g)
+plot(x.pwei.mm.g,y.g,main = "Weibull QQplot")
+abline(0,1)
+```
+
+### Estimated Median
+
+```{r}
+median(d1$gh)
+qweibull(0.5, shape = mm.weib.k.g, scale = mm.weib.lambda.g)
+qgamma(0.5, shape = mm.gamma.shape.g, scale = mm.gamma.scale.g)
+qnorm(0.5, mm.norm.mean.g, mm.norm.sd.g)
+```
+
+* we could know that the median of ht is `r median(d1$ht)` , and the norm median is `r qnorm(0.5, mm.norm.mean.g, mm.norm.sd.g)`, the gamma median is `r qgamma(0.5, shape = mm.gamma.shape.g, scale = mm.gamma.scale.g)`, and the qweibull median is `r qweibull(0.5, shape = mm.weib.k.g, scale = mm.weib.lambda.g)`
+
+### Median Samp Dist (hist)
+
+```{r}
+#gamma
+med.gam.g = NA
+for (i in 1:1000) {
+  data = rgamma(200, shape = mm.gamma.shape.g, scale = mm.gamma.scale.g)
+  med.gam.g[i] = median(data)
+}
+hist(med.gam.g,breaks = 100,main = "Histogram of median of gamma distribution")
+
+#norm
+med.norm.g = NA
+for (i in 1:1000) {
+  data = rnorm(200, mm.norm.mean.g, mm.norm.sd.g)
+  med.norm.g[i] = median(data)
+}
+hist(med.norm.g,breaks = 100,main = "Histogram of median of normal distribution")
+
+#
+med.wei.g = NA
+for (i in 1:1000) {
+  data = rweibull(200, shape = mm.weib.k.g, scale = mm.weib.lambda.g)
+  med.wei.g[i] = median(data)
+}
+hist(med.wei.g,breaks = 100,main = "Histogram of median of weibull distribution")
+```
+
+### Range of middle 95% of Samp Dist
+
+```{r}
+diff(quantile(med.gam.g,probs = c(0.025,0.975)))
+diff(quantile(med.norm.g,probs = c(0.025,0.975)))
+diff(quantile(med.wei.g,probs = c(0.025,0.975)))
+```
+
+* Range of middle 95% of Samp Dist of gamma is `r diff(quantile(med.gam.g,probs = c(0.025,0.975)))`, norm is `r diff(quantile(med.norm.g,probs = c(0.025,0.975)))`, and the weibull is `r diff(quantile(med.wei.g,probs = c(0.025,0.975)))`
+
+
+## MLE
+
+### Estimates of parameters
+
+#### Normal distribution
+
+```{r}
+library(stats4)
+nLL.g <- function(mean, sd){
+  fs <- dnorm(
+    x = d1$gh
+    ,mean = mean
+    ,sd = sd
+    ,log = TRUE
+  )
+  -sum(fs)
+}
+
+fit.g <- mle(
+  nLL.g
   ,start = list(mean = 1, sd = 1)
   ,method = "L-BFGS-B"
   ,lower = c(0,0.01)
 )
 ```
+
+#### Gamma distribution
+
+```{r}
+nLL.gamma.g <- function(shape, scale){
+  fs <- dgamma(
+    x = d1$gh
+    ,shape = shape
+    ,scale = scale
+    ,log = TRUE
+  )
+  -sum(fs)
+}
+
+fit.gamma.g <- mle(
+  nLL.gamma.g
+  ,start = list(shape = 1, scale = 1)
+  ,method = "L-BFGS-B"
+  ,lower = c(0,0.01)
+)
+```
+
+#### Weibull distribution
+
+```{r}
+nLL.weibull.g <- function(shape, scale){
+  fs <- dweibull(
+    x = d1$gh
+    ,shape = shape
+    ,scale = scale
+    ,log = TRUE
+  )
+  -sum(fs)
+}
+
+fit.weibull.g <- mle(
+  nLL.weibull.g
+  ,start = list(shape = 1, scale = 1)
+  ,method = "L-BFGS-B"
+  ,lower = c(0,0.01)
+)
+```
+
+### Overlay estimated pdf onto histogram
+
+#### Normal distribution
+
+```{r}
+hist(d1$gh,breaks = 100, freq = FALSE,xlim = c(4,12),main = "Overlay estimated pdf onto histogram of Normal distribution")
+curve(dnorm(x,mean = coef(fit.g)[1],sd =coef(fit.g)[2]),col = "red" ,add = TRUE, lwd = 4)
+```
+
+#### Gammal distribution
+
+```{r}
+hist(d1$gh,breaks = 100, freq = FALSE,,main = "Overlay estimated pdf onto histogram of Gamma distribution")
+curve(dgamma(x,shape = coef(fit.gamma.g)[1],scale =coef(fit.gamma.g)[2]),col = "blue" ,add = TRUE, lwd = 4)
+```
+
+#### Weibull distribution
+
+```{r}
+hist(d1$gh,breaks = 100, freq = FALSE,main = "Overlay estimated pdf onto histogram of Weibull distribution")
+curve(dweibull(x,shape = coef(fit.weibull.g)[1],scale =coef(fit.weibull.g)[2]),col = "green" ,add = TRUE, lwd = 4)
+```
+
+### Overlay estimated CDF onto eCDF
+
+#### Normal distribution
+
+```{r}
+plot(ecdf(d1$gh),,main = "Overlay estimated CDF onto eCDF of normal distribution")
+curve(pnorm(x,mean = coef(fit.g)[1],sd =coef(fit.g)[2]),col = "red" ,add = TRUE, lwd = 4)
+```
+
+#### Gamma distribution
+
+```{r}
+plot(ecdf(d1$gh),,main = "Overlay estimated CDF onto eCDF of gamma distribution")
+curve(pgamma(x,shape = coef(fit.gamma.g)[1],scale =coef(fit.gamma.g)[2]),col = "blue" ,add = TRUE, lwd = 4)
+```
+
+#### Weibull distribution
+
+```{r}
+plot(ecdf(d1$gh),,main = "Overlay estimated CDF onto eCDF of weibull distribution")
+curve(pweibull(x,shape = coef(fit.weibull.g)[1],scale =coef(fit.weibull.g)[2]),col = "green" ,add = TRUE, lwd = 4)
+```
+
+
+### QQ plot (sample vs estimated dist)
+
+#### Normal distribution
+
+```{r}
+qs <- seq(0.05,0.95,length = 100)
+samp_qs.g <- quantile(d1$gh,qs)
+theor_qs.g <- qnorm(qs,mean = coef(fit.g)[1],sd =coef(fit.g)[2])
+plot(samp_qs.g,theor_qs.g)
+abline(0,1)
+```
+
+#### Gamma distribution
+
+```{r}
+qs <- seq(0.05,0.95,length = 100)
+samp_qs.gamma.g <- quantile(d1$gh,qs)
+theor_qs.gamma.g <- qgamma(qs,shape = coef(fit.gamma.g)[1],scale =coef(fit.gamma.g)[2])
+plot(samp_qs.gamma.g,theor_qs.gamma.g)
+abline(0,1)
+```
+
+#### Weibull distribution
+
+```{r}
+qs <- seq(0.05,0.95,length = 100)
+samp_qs.w.g <- quantile(d1$ht,qs)
+theor_qs.w.g <- qweibull(qs,shape = coef(fit.weibull.g)[1],scale =coef(fit.weibull.g)[2])
+plot(samp_qs.w.g,theor_qs.w.g)
+abline(0,1)
+```
+
+
+### Estimated Median
+
+#### Normal distribution
+
+```{r}
+qnorm(0.5,mean = coef(fit.g)[1],sd = coef(fit.g)[2])
+```
+
+#### Gamma distribution
+
+```{r}
+qgamma(0.5,shape = coef(fit.gamma.g)[1],scale =coef(fit.gamma.g)[2])
+```
+
+#### Weibull distribution
+
+```{r}
+qweibull(0.5,shape = coef(fit.weibull.g)[1],scale =coef(fit.weibull.g)[2])
+```
+
+### Median Samp Dist (hist)
+
+#### Normal distribution
+
+```{r}
+M <- 500
+N <- 1000
+out.g <- rnorm(N*M,mean = coef(fit.g)[1],sd =coef(fit.g)[2])  %>%  array(dim = c(M,N))
+
+samp_dist.g.g <- apply(out.g,1,median)
+hist(samp_dist.g.g,breaks = 100,,main = "Median Samp Dist (hist) of normal distribution")
+```
+
+#### Gamma distribution
+
+```{r}
+M <- 500
+N <- 1000
+out.gamma.g <- rgamma(N*M,shape = coef(fit.gamma.g)[1],scale =coef(fit.gamma.g)[2])  %>%  array(dim = c(M,N))
+
+samp_dist.gamma.g <- apply(out.gamma.g,1,median)
+hist(samp_dist.gamma.g,breaks = 100,main = "Median Samp Dist (hist) of gamma distribution")
+```
+
+#### Weibull distribution
+
+```{r}
+M <- 500
+N <- 1000
+out.w.g <- rweibull(N*M,shape = coef(fit.weibull.g)[1],scale =coef(fit.weibull.g)[2])  %>%  array(dim = c(M,N))
+
+samp_dist.w.g <- apply(out.w.g,1,median)
+hist(samp_dist.w.g,breaks = 100,main = "Median Samp Dist (hist) of weibull distribution")
+```
+
+### Range of middle 95% of Samp Dist
+
+```{r}
+diff(quantile(samp_dist.g.g,c(0.05/2,1-0.05/2)))
+diff(quantile(samp_dist.gamma.g,c(0.05/2,1-0.05/2)))
+diff(quantile(samp_dist.w.g,c(0.05/2,1-0.05/2)))
+```
+
+* Range of middle 95% of Samp Dist of gamma is `r diff(quantile(samp_dist.gamma.g,c(0.05/2,1-0.05/2)))`, norm is `r diff(quantile(samp_dist.g.g,c(0.05/2,1-0.05/2)))`, and the weibull is `r diff(quantile(samp_dist.w.g,c(0.05/2,1-0.05/2)))`
+
+
 
