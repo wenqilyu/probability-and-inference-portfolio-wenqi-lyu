@@ -23,6 +23,37 @@ d1 <- nhgh %>%
   filter(1:n()<=1000)
 ```
 
+# Introduction
+
+We want to figure out which kind of distribution fits the data well. In this blog, we choose 3 kinds of distribution, normal, gamma and weibull distribution. These three distribution are the most common distribution.
+
+We use MM and MLE to calculate the parameters for each distribution and then make some plots to find out which distribution fits the data.
+
+## What is Method of Moments (MM)
+
+Method of Moments：the method of moments is a method of estimation of population parameters.(From wikipedia)
+
+*  the step of MM:(From professor's slide)
+
+1a. Choose a parametric distribution, \(F_X(x|\theta)\)
+
+1b. Identify the distribution parameters, \(\theta\)
+
+Calculate/find distribution moments (need as many moments as distribution parameters), \(E[X^k]\) or \(E[(X - E[X])^k]\)
+
+Calculate sample moments.
+
+Create system of equations equating distribution moments to sample moments.
+
+Solve system of equations for distribution parameters.
+
+\(\hat{F}_X = F_X(x | \theta = \hat{\theta})\)
+
+
+## What is Maximum Likelihood Estimation (MLE)
+
+In statistics, maximum likelihood estimation (MLE) is a method of estimating the parameters of a probability distribution by maximizing a likelihood function, so that under the assumed statistical model the observed data is most probable. The point in the parameter space that maximizes the likelihood function is called the maximum likelihood estimate.(From wikipedia)
+
 # ht
 
 ## MM
@@ -420,7 +451,7 @@ curve(pweibull(x, shape = mm.weib.k.g, scale = mm.weib.lambda.g),add = TRUE, col
 ### QQ plot (sample vs estimated dist)
 
 ```{r}
-p = ppoints(300)
+p = ppoints(3000)
 y.g = quantile(d1$gh, probs = p)
 #gamma
 x.gamma.mm.g = qgamma(p, shape = mm.gamma.shape.g, scale = mm.gamma.scale.g)
@@ -571,7 +602,7 @@ curve(dgamma(x,shape = coef(fit.gamma.g)[1],scale =coef(fit.gamma.g)[2]),col = "
 ```
 
 #### Weibull distribution
-
+ 
 ```{r}
 hist(d1$gh,breaks = 100, freq = FALSE,main = "Overlay estimated pdf onto histogram of Weibull distribution")
 curve(dweibull(x,shape = coef(fit.weibull.g)[1],scale =coef(fit.weibull.g)[2]),col = "green" ,add = TRUE, lwd = 4)
@@ -606,7 +637,7 @@ curve(pweibull(x,shape = coef(fit.weibull.g)[1],scale =coef(fit.weibull.g)[2]),c
 #### Normal distribution
 
 ```{r}
-qs <- seq(0.05,0.95,length = 100)
+qs <- seq(0.05,0.95,length = 5000)
 samp_qs.g <- quantile(d1$gh,qs)
 theor_qs.g <- qnorm(qs,mean = coef(fit.g)[1],sd =coef(fit.g)[2])
 plot(samp_qs.g,theor_qs.g)
@@ -616,7 +647,7 @@ abline(0,1)
 #### Gamma distribution
 
 ```{r}
-qs <- seq(0.05,0.95,length = 100)
+qs <- seq(0.05,0.95,length = 5000)
 samp_qs.gamma.g <- quantile(d1$gh,qs)
 theor_qs.gamma.g <- qgamma(qs,shape = coef(fit.gamma.g)[1],scale =coef(fit.gamma.g)[2])
 plot(samp_qs.gamma.g,theor_qs.gamma.g)
@@ -699,5 +730,12 @@ diff(quantile(samp_dist.w.g,c(0.05/2,1-0.05/2)))
 
 * Range of middle 95% of Samp Dist of gamma is `r diff(quantile(samp_dist.gamma.g,c(0.05/2,1-0.05/2)))`, norm is `r diff(quantile(samp_dist.g.g,c(0.05/2,1-0.05/2)))`, and the weibull is `r diff(quantile(samp_dist.w.g,c(0.05/2,1-0.05/2)))`
 
+# Conclusion
 
+## ht
 
+According to Plots, normal and gamma distribution could fit the data in both MM and MLE, the weibull distribution might could not fit the data very well in MM and MLE. But the weibull distribution might fit the data better in MLE than MM.
+
+## gh
+
+According to Plots, none of the distribution could fit the data very well. 
