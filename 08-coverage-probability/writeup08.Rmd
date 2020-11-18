@@ -1,0 +1,96 @@
+---
+title: "writeup09"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Step 1 : Generate a single sample
+
+Generate a single sample from a standard normal distribution
+of size *N* = 201. Explain to the reader how you use MLE to estimate the
+distribution.
+
+
+```{r}
+N = 201
+data = rnorm(N)
+mle.mean <- mean(data)
+mle.sd <- sqrt(((N-1)/N)*var(data))
+hist(data,freq = FALSE)
+curve(dnorm(x,mle.mean,mle.sd),add = TRUE)
+```
+
+In this step, we generate a standard normal distribution which the sample size is N = 201. Then, we use MLE to estimate the mean and sd of this distribution, and make le overlay plot.
+
+# Step 2 : Approximating the sampling distribution of the median
+
+Show the reader how you approximate the sampling distribution
+of the median, conditional on the estimate of the distribution in the
+previous step.
+
+```{r}
+n = 5000
+meds = NA
+
+for (i in 1:n) {
+  re.samp = rnorm(N, mle.mean, mle.sd)
+  meds[i] = median(re.samp)
+}
+
+hist(meds)
+```
+
+In this step, we simulate 5000 times, we get the distribution of the median of the primary distribution. 
+
+# Step 3 : Calculating a 95% confidence interval
+
+Describe how you calculate a 95% confidence interval from the
+approximated sampling distribution.
+
+```{r}
+ci = quantile(meds,c(0.0025,0.975))
+
+(ci[1] < 0 & ci[2] > 0)
+```
+
+In this step, we calculate the 95% confidence interval.
+
+# Step 4 : Explaining the concept of coverage probability
+
+Explain the concept of coverage probability. Explain your code
+for calculating the coverage probability.
+
+```{r}
+gen.ci.med = function( n = 5000, N = 201, parm.int = 0){
+  data = rnorm(N)
+  mle.mean <- mean(data)
+  mle.sd <- sqrt(((N-1)/N)*var(data))
+  meds = rbeta(n,101,101) %>% qnorm(mean = mle.mean, sd = mle.sd)
+  ci = quantile(meds,c(0.0025,0.975))
+  return (ci[1] < parm.int & ci[2] > parm.int)
+}
+
+ci.contain = NA
+for (i in 1:1000) {
+  ci.contain[i] = gen.ci.med()
+}
+mean(ci.contain)
+```
+
+we create a function to combining the steps we have done before. and then we simulated this function in 1000 times, to find out the proportion of the median of this distribution in the confidence interval. This proportion is the coverage probability.
+
+**Step:** Perform the simulation and report the results.
+
+```{r}
+I meet some problems when I made this plot...
+```
+
+
+**Step:** Describe how you might change the simulation to learn more
+about the operating characteristics of your chosen method for
+constructing the 95% confidence interval.
+
+I would like to use other distribution insted of normal distribution, I will test gamma distribution, weibull distribution like the last homework I have done.
