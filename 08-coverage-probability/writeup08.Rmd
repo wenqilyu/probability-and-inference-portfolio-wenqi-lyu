@@ -1,6 +1,12 @@
 ---
 title: "writeup09"
-output: html_document
+output: 
+  html_document: 
+    code_folding: hide
+    toc: yes
+    number_sections: true
+    toc_depth: 4
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
@@ -13,6 +19,9 @@ Generate a single sample from a standard normal distribution
 of size *N* = 201. Explain to the reader how you use MLE to estimate the
 distribution.
 
+```{r}
+library(magrittr)
+```
 
 ```{r}
 N = 201
@@ -51,7 +60,7 @@ Describe how you calculate a 95% confidence interval from the
 approximated sampling distribution.
 
 ```{r}
-ci = quantile(meds,c(0.0025,0.975))
+ci = quantile(meds,c(0.025,0.975))
 
 (ci[1] < 0 & ci[2] > 0)
 ```
@@ -69,7 +78,7 @@ gen.ci.med = function( n = 5000, N = 201, parm.int = 0){
   mle.mean <- mean(data)
   mle.sd <- sqrt(((N-1)/N)*var(data))
   meds = rbeta(n,101,101) %>% qnorm(mean = mle.mean, sd = mle.sd)
-  ci = quantile(meds,c(0.0025,0.975))
+  ci = quantile(meds,c(0.025,0.975))
   return (ci[1] < parm.int & ci[2] > parm.int)
 }
 
@@ -82,11 +91,6 @@ mean(ci.contain)
 
 we create a function to combining the steps we have done before. and then we simulated this function in 1000 times, to find out the proportion of the median of this distribution in the confidence interval. This proportion is the coverage probability.
 
-**Step:** Perform the simulation and report the results.
-
-```{r}
-I meet some problems when I made this plot...
-```
 
 
 **Step:** Describe how you might change the simulation to learn more
