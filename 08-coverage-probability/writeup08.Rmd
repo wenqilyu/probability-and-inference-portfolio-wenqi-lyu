@@ -67,6 +67,9 @@ ci = quantile(meds,c(0.025,0.975))
 
 In this step, we calculate the 95% confidence interval. Firstly, we calculate the number in 2.5% quantile position and 97.5% quantile position. Then, we estimate whether both the number in  2.5% is less than 0 and number in 97.5% is more than 0.
 
+the quantile function is used to calculate the confidence interval. 95% confidence interval of median is between -0.1312761 and 0.2267810.
+
+
 # Step 4 : Explaining the concept of coverage probability
 
 Explain the concept of coverage probability. Explain your code
