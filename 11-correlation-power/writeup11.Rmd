@@ -86,8 +86,13 @@ N <- c(25,50,75,100)
 results2 = outer(X = N, Y = rho, FUN = power.corr)
 ```
 
+* this step gives us the correlation in different sample size and different power.
+
 ```{r}
 matplot(t(results2),type = "l",xaxt="n")
 axis(1,labels = rho, at=c(1:length(rho)))
 ```
+
+
+* this plot shows the relationship between the correlation and power in different sample size. When the sample size increase, the power increase in the same correlation. In addition, the correlation will increase in the same power and the sample size decrease.
 
